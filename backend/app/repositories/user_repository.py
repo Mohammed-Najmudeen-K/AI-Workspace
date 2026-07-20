@@ -10,6 +10,13 @@ class UserRepository:
 
     def get_by_email(self, email: str):
         return self.db.query(User).filter(User.email == email).first()
+    
+    def get_by_id(self, user_id: int):
+        return (
+        self.db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     def create(self, user: User):
         self.db.add(user)
