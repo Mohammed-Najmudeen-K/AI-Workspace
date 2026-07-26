@@ -19,6 +19,9 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.database.database import Base
+import app.models.user  # noqa: F401
+import app.models.conversation  # noqa: F401
+import app.models.message  # noqa: F401
 
 target_metadata = Base.metadata
 
