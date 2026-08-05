@@ -1,19 +1,50 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+
 type Props = {
-  sender: "user" | "ai";
+  sender: "user" | "assistant";
   text: string;
 };
 
 function MessageBubble({ sender, text }: Props) {
-  return (
-    <div
-      style={{
-        textAlign: sender === "user" ? "right" : "left",
-        margin: "10px",
-      }}
-    >
-      <strong>{sender === "user" ? "You" : "AI"}:</strong>
+  const isUser = sender === "user";
 
-      <p>{text}</p>
+  return (
+    <div className={`message-row ${isUser ? "user-row" : "assistant-row"}`}>
+      <div className={`message ${isUser ? "user" : "assistant"}`}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            code({ inline, className, children, ...props }: any) {
+              const match = /language-(\w+)/.exec(className || "");
+
+              if (!inline && match) {
+                return (
+                  <SyntaxHighlighter
+                    style={oneDark}
+                    language={match[1]}
+                    PreTag="div"
+                    {...props}
+                  >
+                    {String(children).replace(/\n$/, "")}
+                  </SyntaxHighlighter>
+                );
+              }
+
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            },
+          }}
+        >
+          {text}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 }

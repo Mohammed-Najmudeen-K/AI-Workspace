@@ -44,7 +44,19 @@ class ConversationRepository:
 
     def get_by_id(self, conversation_id):
         conversation_id = self._coerce_id(conversation_id)
-        return self.db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+        # Debug prints can be helpful during development
+        print("Searching conversation:", conversation_id)
+
+        conversation = (
+            self.db.query(Conversation)
+            .filter(Conversation.id == conversation_id)
+            .first()
+        )
+
+        print("Found:", conversation)
+
+        return conversation
 
     def get_all(self):
         return self.db.query(Conversation).order_by(Conversation.created_at.desc()).all()
@@ -67,3 +79,16 @@ class ConversationRepository:
         self.db.delete(conversation)
         self.db.commit()
         return True
+    
+    def update_title(self, conversation_id: int, title: str):
+        conversation = self.get_by_id(conversation_id)
+
+        if conversation is None:
+            return None
+
+        conversation.title = title
+
+        self.db.commit()
+        self.db.refresh(conversation)
+
+        return conversation

@@ -41,7 +41,27 @@ def test_conversation_and_chat_flow():
         def generate(self, prompt: str) -> str:
             return "Hello from Gemini"
 
-    chat_service = ChatService(db, gemini_service=StubGeminiService())
+        def generate_with_context(
+            self,
+            user_message: str,
+            context_chunks: list[str],
+        ) -> str:
+            return "Hello from Gemini"
+
+    class StubEmbeddingService:
+        def generate(self, text: str) -> list[float]:
+            return [0.0]
+
+    class StubChromaService:
+        def search_texts(self, query_embedding: list[float], top_k: int = 5) -> list[str]:
+            return []
+
+    chat_service = ChatService(
+        db,
+        gemini_service=StubGeminiService(),
+        embedding_service=StubEmbeddingService(),
+        chroma_service=StubChromaService(),
+    )
     reply = chat_service.send_message(conversation.id, "Hello")
 
     assert reply == "Hello from Gemini"
@@ -49,3 +69,42 @@ def test_conversation_and_chat_flow():
     assert len(stored_messages) == 2
     assert any(message.role == "user" and message.content == "Hello" for message in stored_messages)
     assert any(message.role == "assistant" and message.content == "Hello from Gemini" for message in stored_messages)
+
+
+def test_chat_uses_retrieved_context():
+    db = setup_test_db()
+
+    conversation_service = ConversationService(db)
+    conversation = conversation_service.create_conversation("RAG Chat")
+
+    class StubEmbeddingService:
+        def generate(self, text: str) -> list[float]:
+            assert text == "What is in my docs?"
+            return [1.0, 2.0]
+
+    class StubChromaService:
+        def search_texts(self, query_embedding: list[float], top_k: int = 5) -> list[str]:
+            assert query_embedding == [1.0, 2.0]
+            return ["Chunk about FastAPI"]
+
+    class StubGeminiService:
+        last_context: list[str] | None = None
+
+        def generate_with_context(
+            self,
+            user_message: str,
+            context_chunks: list[str],
+        ) -> str:
+            StubGeminiService.last_context = context_chunks
+            return f"Answer with {len(context_chunks)} chunks"
+
+    chat_service = ChatService(
+        db,
+        gemini_service=StubGeminiService(),
+        embedding_service=StubEmbeddingService(),
+        chroma_service=StubChromaService(),
+    )
+    reply = chat_service.send_message(conversation.id, "What is in my docs?")
+
+    assert reply == "Answer with 1 chunks"
+    assert StubGeminiService.last_context == ["Chunk about FastAPI"]

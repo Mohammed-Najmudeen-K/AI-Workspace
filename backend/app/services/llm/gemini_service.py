@@ -1,25 +1,85 @@
 from google import genai
-from google.genai.errors import ClientError
 
 from app.core.config import settings
 
-
-client = genai.Client(
-    api_key=settings.GOOGLE_API_KEY
-)
+client = genai.Client(api_key=settings.GOOGLE_API_KEY)
 
 
 class GeminiService:
 
     def build_prompt(self, prompt: str) -> str:
-        return f"You are a helpful assistant.\n\nUser: {prompt}"
+        return f"""
+You are a helpful assistant.
+
+User:
+{prompt}
+"""
+
+    def build_rag_prompt(
+        self,
+        question: str,
+        context: list[str],
+    ):
+        joined = "\n\n".join(context)
+
+        return f"""
+You are a helpful AI assistant.
+
+Answer ONLY from the context below.
+
+If the answer is not present,
+say you couldn't find it.
+
+Context:
+
+{joined}
+
+Question:
+
+{question}
+"""
 
     def generate(self, prompt: str):
-        try:
-            response = client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=self.build_prompt(prompt),
-            )
-            return response.text
-        except Exception:
-            return "I’m sorry, I couldn’t reach the AI service right now."
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt,
+        )
+
+        return response.text
+
+    def generate_with_context(
+        self,
+        question: str,
+        context: list[str],
+    ):
+        prompt = self.build_rag_prompt(
+            question,
+            context,
+        )
+
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt,
+        )
+
+        return response.text
+
+    # NEW
+    def stream_generate(
+        self,
+        question: str,
+        context_chunks: list[dict],
+    ):
+        prompt = self.build_rag_prompt(
+            question,
+            [chunk["text"] for chunk in context_chunks],
+        )
+
+        stream = client.models.generate_content_stream(
+            model="gemini-3.6-flash",
+            contents=prompt,
+        )
+
+        for chunk in stream:
+            if chunk.text:
+                yield chunk.text

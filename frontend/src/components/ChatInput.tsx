@@ -1,13 +1,21 @@
 import { useState } from "react";
 
-type ChatInputProps = {
+type Props = {
   onSend: (text: string) => void;
+  loading: boolean;
+  isStreaming: boolean;
+  onStop: () => void;
 };
 
-function ChatInput({ onSend }: ChatInputProps) {
+function ChatInput({
+  onSend,
+  loading,
+  isStreaming,
+  onStop,
+}: Props) {
   const [text, setText] = useState("");
 
-  const handleSend = () => {
+  const send = () => {
     if (!text.trim()) return;
 
     onSend(text);
@@ -18,14 +26,34 @@ function ChatInput({ onSend }: ChatInputProps) {
   return (
     <div className="chat-input">
       <input
+        className="chat-input__field"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Type a message..."
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !isStreaming) {
+            send();
+          }
+        }}
+        placeholder="Type a message or ask a question..."
+        disabled={isStreaming}
       />
 
-      <button onClick={handleSend}>
-        Send
-      </button>
+      {isStreaming ? (
+        <button
+          onClick={onStop}
+          className="chat-input__button chat-input__button--stop"
+        >
+          Stop
+        </button>
+      ) : (
+        <button
+          disabled={loading}
+          onClick={send}
+          className="chat-input__button"
+        >
+          {loading ? "Thinking..." : "Send"}
+        </button>
+      )}
     </div>
   );
 }
