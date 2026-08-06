@@ -221,23 +221,6 @@ The project has progressed through several implementation stages covering core c
 - Phase 8: backend reliability and API hardening
 - Phase 9: final polish across chat and document workflows
 
-### Phase 10 – Testing
-
-The next milestone is formal validation across the backend and frontend.
-
-#### Backend
-
-- [ ] Chat API
-- [ ] Streaming API
-- [ ] RAG retrieval
-- [ ] Document upload
-
-#### Frontend
-
-- [ ] Chat UI
-- [ ] Sidebar
-- [ ] Upload flow
-
 ## License
 
 This repository does not currently include an explicit license. Add one if you want to share or distribute the project publicly.
