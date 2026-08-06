@@ -18,6 +18,8 @@ router = APIRouter(
 @router.post(
     "/upload",
     response_model=DocumentResponse,
+    summary="Upload a document",
+    description="Uploads a document file and stores it for retrieval in the knowledge base.",
 )
 def upload_document(
     file: UploadFile = File(...),
@@ -31,6 +33,8 @@ def upload_document(
 @router.get(
     "",
     response_model=list[DocumentResponse],
+    summary="List documents",
+    description="Returns all uploaded documents available in the knowledge base.",
 )
 def list_documents(
     db: Session = Depends(get_db),
@@ -40,7 +44,7 @@ def list_documents(
     return service.list_documents()
 
 
-@router.delete("/{document_id}")
+@router.delete("/{document_id}", summary="Delete a document", description="Removes a document from the knowledge base by id.")
 def delete_document(
     document_id: int,
     db: Session = Depends(get_db),
@@ -56,3 +60,11 @@ def delete_document(
         )
 
     return {"message": "Document deleted"}
+
+
+@router.delete("", summary="Delete all documents", description="Removes every uploaded document and its indexed chunks from the knowledge base.")
+def delete_all_documents(db: Session = Depends(get_db)):
+    service = DocumentService(db)
+    deleted_count = service.delete_all_documents()
+
+    return {"message": "Documents deleted", "deleted_count": deleted_count}

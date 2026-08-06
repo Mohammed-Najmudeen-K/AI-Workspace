@@ -10,7 +10,13 @@ from app.services.conversation_service import ConversationService
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
 
-@router.post("", response_model=ConversationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ConversationResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a conversation",
+    description="Creates a new conversation thread with an optional title.",
+)
 def create_conversation(
     payload: Optional[ConversationCreate] = None,
     db: Session = Depends(get_db),
@@ -20,13 +26,13 @@ def create_conversation(
     return service.create_conversation(title)
 
 
-@router.get("", response_model=list[ConversationResponse])
+@router.get("", response_model=list[ConversationResponse], summary="List conversations", description="Returns all conversations available for the current user context.")
 def list_conversations(db: Session = Depends(get_db)):
     service = ConversationService(db)
     return service.list_conversations()
 
 
-@router.get("/{conversation_id}", response_model=ConversationResponse)
+@router.get("/{conversation_id}", response_model=ConversationResponse, summary="Get a conversation", description="Fetches a single conversation including its messages.")
 def get_conversation(conversation_id: int, db: Session = Depends(get_db)):
     service = ConversationService(db)
     try:
@@ -35,7 +41,7 @@ def get_conversation(conversation_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
-@router.patch("/{conversation_id}", response_model=ConversationResponse)
+@router.patch("/{conversation_id}", response_model=ConversationResponse, summary="Rename a conversation", description="Updates the title of an existing conversation.")
 def rename_conversation(conversation_id: int, payload: ConversationCreate, db: Session = Depends(get_db)):
     service = ConversationService(db)
     try:
@@ -44,7 +50,7 @@ def rename_conversation(conversation_id: int, payload: ConversationCreate, db: S
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
-@router.delete("/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete a conversation", description="Removes a conversation and any associated messages.")
 def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
     service = ConversationService(db)
     try:

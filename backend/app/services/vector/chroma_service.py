@@ -30,6 +30,17 @@ class ChromaService:
             ],
         )
 
+    def delete_document(self, document_id: int):
+        try:
+            response = collection.get(where={"document_id": document_id})
+        except Exception:
+            return
+
+        ids = response.get("ids") or []
+
+        if ids:
+            collection.delete(ids=ids)
+
     def search(
         self,
         embedding: list[float],

@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTheme } from "../context/ThemeContext";
 import AppNav from "./AppNav";
 
 type SidebarProps = {
@@ -23,9 +24,13 @@ function Sidebar({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [search, setSearch] = useState("");
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="sidebar">
+      <button type="button" className="theme-toggle" onClick={toggleTheme}>
+        {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+      </button>
 
       <AppNav variant="sidebar" />
 

@@ -9,10 +9,10 @@ from app.services.vector.chroma_service import ChromaService
 
 class DocumentService:
 
-    def __init__(self, db):
+    def __init__(self, db, embedding_service=None, chroma_service=None):
         self.repository = DocumentRepository(db)
-        self.embedding_service = EmbeddingService()
-        self.chroma_service = ChromaService()
+        self.embedding_service = embedding_service or EmbeddingService()
+        self.chroma_service = chroma_service or ChromaService()
 
     def save_document(self, file):
         upload_dir = "app/uploads"
@@ -59,4 +59,24 @@ class DocumentService:
         return self.repository.get_all()
 
     def delete_document(self, document_id: int):
+        document = self.repository.get_by_id(document_id)
+
+        if not document:
+            return False
+
+        if os.path.exists(document.filepath):
+            os.remove(document.filepath)
+
+        self.chroma_service.delete_document(document_id)
         return self.repository.delete(document_id)
+
+    def delete_all_documents(self):
+        documents = self.repository.get_all()
+
+        for document in documents:
+            if os.path.exists(document.filepath):
+                os.remove(document.filepath)
+
+            self.chroma_service.delete_document(document.id)
+
+        return self.repository.delete_all()

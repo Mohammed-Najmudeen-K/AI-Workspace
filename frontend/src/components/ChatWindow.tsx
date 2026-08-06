@@ -1,28 +1,38 @@
-import { useEffect, useRef } from "react";
+import type { RefObject } from "react";
 
 import MessageBubble from "./MessageBubble";
 
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+  reaction?: "like" | "dislike" | null;
+};
+
 type ChatWindowProps = {
-  messages: any[];
+  messages: ChatMessage[];
   loading: boolean;
   isStreaming: boolean;
+  containerRef: RefObject<HTMLDivElement | null>;
+  showScrollButton: boolean;
+  onCopy: (text: string) => void;
+  onReact: (index: number, reaction: "like" | "dislike" | null) => void;
+  onRegenerate: (index: number) => void;
+  onScrollToBottom: () => void;
 };
 
 function ChatWindow({
   messages,
   loading,
   isStreaming,
+  containerRef,
+  showScrollButton,
+  onCopy,
+  onReact,
+  onRegenerate,
+  onScrollToBottom,
 }: ChatWindowProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [messages, loading, isStreaming]);
-
   return (
-    <div className="chat-window">
+    <div className="chat-window" ref={containerRef}>
       {messages.length === 0 ? (
         <div className="empty-state">
           <h2>🤖 AI Workspace</h2>
@@ -33,9 +43,13 @@ function ChatWindow({
         <>
           {messages.map((message, index) => (
             <MessageBubble
-              key={index}
+              key={`${message.role}-${index}`}
               sender={message.role === "assistant" ? "assistant" : "user"}
               text={message.content}
+              reaction={message.reaction}
+              onCopy={onCopy}
+              onReact={(reaction) => onReact(index, reaction)}
+              onRegenerate={message.role === "assistant" ? () => onRegenerate(index) : undefined}
             />
           ))}
 
@@ -44,11 +58,15 @@ function ChatWindow({
               <div className="typing-dot" />
               <div className="typing-dot" />
               <div className="typing-dot" />
-              <span>Gemini is typing...</span>
+              <span className="typing-text">Gemini is typing<span className="typing-cursor" /></span>
             </div>
           )}
 
-          <div ref={bottomRef} />
+          {showScrollButton && (
+            <button type="button" className="scroll-to-bottom" onClick={onScrollToBottom}>
+              ↓
+            </button>
+          )}
         </>
       )}
     </div>

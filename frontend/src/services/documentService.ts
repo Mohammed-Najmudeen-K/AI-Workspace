@@ -21,3 +21,8 @@ export const uploadDocument = async (file: File) => {
 export const deleteDocument = async (id: number) => {
     await api.delete(`/documents/${id}`);
 };
+
+export const deleteAllDocuments = async () => {
+    const res = await api.delete("/documents");
+    return res.data;
+};

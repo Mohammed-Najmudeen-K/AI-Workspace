@@ -1,58 +1,152 @@
 ﻿# AI Workspace
 
-AI Workspace is a full-stack proof-of-concept chat and knowledge base application built with a FastAPI backend and a React frontend.
+AI Workspace is a full-stack AI assistant application that combines a conversational chat experience with document-based retrieval-augmented generation (RAG). It is built with a FastAPI backend and a React + Vite frontend, and it allows users to chat with an AI assistant while grounding answers in uploaded documents.
 
-The app supports streaming AI responses, document upload and retrieval-augmented generation (RAG), and a modern conversational interface.
+The project is designed as a practical prototype for building an AI knowledge workspace where users can:
 
-## Key Features
+- create and manage chat conversations
+- stream assistant responses in real time
+- upload documents to a knowledge base
+- retrieve relevant document chunks for context-aware answers
+- manage authentication and user sessions
 
-- FastAPI backend with REST and streaming chat endpoints
-- React frontend with conversation history, chat UI, and document management
-- Document upload, parsing, chunking, embedding, and storage
-- RAG-powered responses using ChromaDB and Google Gemini
-- Streaming assistant output with live UI updates and cancel/stop support
-- SQLAlchemy persistence for conversations, messages, and documents
-- Authentication API endpoints for register and login
+## What the app does
 
-## Architecture
+The application works in three main layers:
 
-- `backend/`: Python FastAPI application
-  - `app/api/`: API routers for auth, chat, conversations, documents, and streaming
-  - `app/services/`: Business logic for chat, document ingestion, embeddings, and vector search
-  - `app/models/`: SQLAlchemy models for conversations, messages, documents, and chunks
-  - `app/schemas/`: Pydantic request/response schemas
-  - `app/database/`: database session and base model
-  - `app/core/config.py`: configuration loader from `.env`
+1. Frontend experience
+   - users interact with a chat UI and document management page
+   - conversations, messages, uploads, and settings are handled in the React app
 
-- `frontend/`: React + Vite application
-  - `src/pages/`: Chat and Documents pages
-  - `src/components/`: UI components for chat, sidebar, and messages
-  - `src/services/`: API wrappers for chat and document endpoints
-  - `src/index.css`: application styling
+2. Backend API
+   - FastAPI exposes routes for authentication, chat, conversations, documents, and streaming
+   - requests are validated, processed, and responded to through dedicated services
 
-## Getting Started
+3. AI and knowledge layer
+   - user questions are embedded and matched against indexed document chunks using ChromaDB
+   - retrieved context is passed to Gemini for answer generation
+   - the system can answer general questions when no relevant document context is available
+
+## Project flow
+
+### 1. User opens the app
+
+The user visits the frontend at http://localhost:5173 and lands on the chat experience. The UI loads existing conversations and provides access to the document library and settings panel.
+
+### 2. User sends a message
+
+When a user submits a chat message:
+
+- the frontend sends the prompt to the backend chat endpoint
+- the backend creates or loads the conversation
+- the message is stored in the database
+- the backend generates an embedding for the user question
+
+### 3. Context retrieval
+
+The backend searches the vector database (ChromaDB) for document chunks that are semantically similar to the query.
+
+If relevant chunks are found:
+- those chunks are used as context for answer generation
+- the response is grounded in the uploaded documents
+
+If no relevant context is found:
+- the system can still provide a helpful general answer from the LLM
+- this makes the assistant usable even outside the knowledge base
+
+### 4. Answer generation
+
+The retrieved context and the user question are passed to Gemini, which generates the final response.
+
+The backend may also attach source references to the answer if the response came from indexed document content.
+
+### 5. Conversation persistence
+
+Conversations and messages are stored in SQLAlchemy-backed tables so the chat history remains available between sessions.
+
+### 6. Document ingestion
+
+When a document is uploaded:
+
+- the file is saved to the backend upload folder
+- text is extracted from the document
+- content is split into smaller chunks
+- embeddings are generated
+- the chunks are indexed into ChromaDB for later retrieval
+
+## Main features
+
+- streaming chat responses with live UI updates
+- conversation history and management
+- document upload and deletion
+- knowledge-base indexing and retrieval
+- authentication and user account routes
+- settings panel for chat and document actions
+
+## Architecture overview
+
+### Backend structure
+
+- backend/app/api/: API routers for auth, chat, conversations, documents, and streaming
+- backend/app/services/: business logic for chat, document processing, embeddings, and vector search
+- backend/app/models/: SQLAlchemy models for users, conversations, messages, and documents
+- backend/app/schemas/: Pydantic validation models for API input and output
+- backend/app/database/: database connection and base setup
+- backend/app/core/config.py: environment configuration loader
+
+### Frontend structure
+
+- frontend/src/pages/: chat and document pages
+- frontend/src/components/: chat UI, sidebar, message bubbles, and navigation
+- frontend/src/services/: API wrappers for chat and document routes
+- frontend/src/context/: shared app state such as authentication or theme context
+- frontend/src/styles/: styling and theme definitions
+
+## Technology stack
+
+### Backend
+
+- Python
+- FastAPI
+- SQLAlchemy
+- Pydantic
+- ChromaDB
+- Google Gemini API
+- Uvicorn
+
+### Frontend
+
+- React
+- TypeScript
+- Vite
+- Axios
+- React Router
+- CSS-based styling
+
+## Getting started
 
 ### Prerequisites
 
-- Python 3.11+ (or compatible Python 3.x)
-- Node.js 18+ and npm
+- Python 3.11+
+- Node.js 18+
+- npm
 - Git
 
-### Backend setup
+### 1. Backend setup
 
-1. Open a terminal and change into the backend folder:
+Open a terminal and go to the backend folder:
 
 ```bash
 cd backend
 ```
 
-2. Install Python dependencies:
+Install the Python dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file in `backend/` and add the required variables:
+Create a .env file in the backend directory with the required variables:
 
 ```env
 DATABASE_URL=sqlite:///./test.db
@@ -61,61 +155,88 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 GOOGLE_API_KEY=your-google-api-key
 ```
 
-4. Start the backend server:
+Start the backend server:
 
 ```bash
 uvicorn app.main:app --reload --port 8014
 ```
 
-5. Open the API docs in your browser:
+Open the API docs here:
 
 ```text
 http://127.0.0.1:8014/docs
 ```
 
-### Frontend setup
+### 2. Frontend setup
 
-1. Open a new terminal and change into the frontend folder:
+Open a second terminal and go to the frontend folder:
 
 ```bash
 cd frontend
 ```
 
-2. Install Node dependencies:
+Install the frontend dependencies:
 
 ```bash
 npm install
 ```
 
-3. Start the frontend development server:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Open the frontend app in your browser:
+Open the app at:
 
 ```text
 http://localhost:5173
 ```
 
-## Usage
+## Environment and storage notes
 
-- Use the chat interface to send messages to the AI assistant.
-- The assistant response is streamed back in real time from `/chat/stream`.
-- Upload documents from the Documents page to index files and enable retrieval.
-- Delete uploaded documents from the document list.
+- The frontend expects the backend at http://127.0.0.1:8014
+- Uploaded files are stored under backend/app/uploads
+- The vector database is stored under backend/app/chroma_db
+- The application uses SQLite by default for local development
 
-## Notes
+## Usage examples
 
-- The frontend expects the backend API to be available at `http://127.0.0.1:8014`.
-- Document upload uses multipart form data and persists files under `backend/app/uploads`.
-- The vector database is stored in `backend/app/chroma_db`.
-- The current UI flow centers on a single assistant chat experience; multi-agent orchestration is not currently exposed in the main UI.
+- Ask a question about uploaded documents to trigger RAG-based answers
+- Ask a general question outside the knowledge base to test the fallback assistant behavior
+- Upload PDFs, text files, and other supported document types to build up the knowledge base
+- Delete documents from the UI to remove them from storage and indexing
 
-## Project Status
+## Project roadmap and status
 
-This project is under active development and acts as a prototype for an AI-assisted knowledge workspace.
+The project has progressed through several implementation stages covering core chat, document management, authentication, UI polish, and backend hardening.
+
+### Completed phases
+
+- Phase 1–3: project foundation, backend setup, and core chat/document architecture
+- Phase 4: chat experience improvements with streaming UI and conversation polish
+- Phase 5: document management improvements including upload flow and deletion
+- Phase 6: settings and UX enhancements
+- Phase 7: authentication and user-facing account flows
+- Phase 8: backend reliability and API hardening
+- Phase 9: final polish across chat and document workflows
+
+### Phase 10 – Testing
+
+The next milestone is formal validation across the backend and frontend.
+
+#### Backend
+
+- [ ] Chat API
+- [ ] Streaming API
+- [ ] RAG retrieval
+- [ ] Document upload
+
+#### Frontend
+
+- [ ] Chat UI
+- [ ] Sidebar
+- [ ] Upload flow
 
 ## License
 

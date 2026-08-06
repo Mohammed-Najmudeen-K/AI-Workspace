@@ -8,7 +8,12 @@ from app.services.chat_service import ChatService
 router = APIRouter(prefix="/chat", tags=["AI Chat"])
 
 
-@router.post("", response_model=ChatResponse)
+@router.post(
+    "",
+    response_model=ChatResponse,
+    summary="Send a chat message",
+    description="Creates a new reply for the current conversation using the configured AI service.",
+)
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
     service = ChatService(db)
 

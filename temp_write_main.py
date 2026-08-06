@@ -1,4 +1,5 @@
-import logging
+from pathlib import Path
+content = '''import logging
 import time
 
 from fastapi import FastAPI, HTTPException, Request
@@ -83,3 +84,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+'''
+Path('d:/AI Workspace/backend/app/main.py').write_text(content)
+print('updated')

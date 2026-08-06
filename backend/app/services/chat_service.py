@@ -59,17 +59,19 @@ class ChatService:
 
             # Build source list
             sources = set()
-            
+
             for chunk in context_chunks:
-                
+                if not isinstance(chunk, dict):
+                    continue
+
                 document = self.document_repository.get_by_id(
-                  chunk["document_id"]
+                    chunk.get("document_id")
                 )
 
                 if document:
                     sources.add(
                         f"{document.filename} "
-                        f"(Chunk {chunk['chunk_id']})"
+                        f"(Chunk {chunk.get('chunk_id')})"
                     )
 
             if sources:

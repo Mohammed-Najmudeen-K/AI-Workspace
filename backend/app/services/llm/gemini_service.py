@@ -22,17 +22,27 @@ User:
     ):
         joined = "\n\n".join(context)
 
-        return f"""
+        if context:
+            return f"""
 You are a helpful AI assistant.
 
-Answer ONLY from the context below.
-
-If the answer is not present,
-say you couldn't find it.
+Use the provided context when it is relevant.
+If the answer is not present in the context, say that clearly and provide a helpful general answer if possible.
 
 Context:
 
 {joined}
+
+Question:
+
+{question}
+"""
+
+        return f"""
+You are a helpful AI assistant.
+
+Answer the user's question directly and helpfully.
+Do not claim to have retrieved any documents if none were provided.
 
 Question:
 

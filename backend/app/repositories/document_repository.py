@@ -44,6 +44,15 @@ class DocumentRepository:
 
         return False
 
+    def delete_all(self):
+        documents = self.db.query(Document).all()
+
+        for document in documents:
+            self.db.delete(document)
+
+        self.db.commit()
+        return len(documents)
+
     def get_by_id(self, document_id: int):
         return (
             self.db.query(Document)
