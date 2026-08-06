@@ -213,13 +213,23 @@ The project has progressed through several implementation stages covering core c
 
 ### Completed phases
 
-- Phase 1–3: project foundation, backend setup, and core chat/document architecture
-- Phase 4: chat experience improvements with streaming UI and conversation polish
-- Phase 5: document management improvements including upload flow and deletion
-- Phase 6: settings and UX enhancements
-- Phase 7: authentication and user-facing account flows
-- Phase 8: backend reliability and API hardening
-- Phase 9: final polish across chat and document workflows
+## Current Status
+
+✅ Authentication
+
+✅ Streaming Chat
+
+✅ RAG
+
+✅ ChromaDB
+
+✅ Document Upload
+
+✅ Conversation History
+
+🚧 Voice Assistant (Planned)
+
+🚧 Export Chat (Planned)
 
 ## License
 
