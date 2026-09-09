@@ -24,12 +24,15 @@ ENV_VALUES = _load_env_file(ENV_FILE)
 
 class Settings:
     def __init__(self):
-        self.PROJECT_NAME = ENV_VALUES.get("PROJECT_NAME", "AI Workspace")
-        self.DATABASE_URL = ENV_VALUES.get("DATABASE_URL", "sqlite:///./test.db")
-        self.SECRET_KEY = ENV_VALUES.get("SECRET_KEY", "test-secret-key")
-        self.ALGORITHM = ENV_VALUES.get("ALGORITHM", "HS256")
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = int(ENV_VALUES.get("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-        self.GOOGLE_API_KEY = ENV_VALUES.get("GOOGLE_API_KEY", "dummy")
+        self.PROJECT_NAME = os.getenv("PROJECT_NAME", ENV_VALUES.get("PROJECT_NAME", "AI Workspace"))
+        self.DATABASE_URL = os.getenv("DATABASE_URL", ENV_VALUES.get("DATABASE_URL", "sqlite:///./test.db"))
+        self.SECRET_KEY = os.getenv("SECRET_KEY", ENV_VALUES.get("SECRET_KEY", "test-secret-key"))
+        self.ALGORITHM = os.getenv("ALGORITHM", ENV_VALUES.get("ALGORITHM", "HS256"))
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(
+            "ACCESS_TOKEN_EXPIRE_MINUTES",
+            ENV_VALUES.get("ACCESS_TOKEN_EXPIRE_MINUTES", "30"),
+        ))
+        self.GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", ENV_VALUES.get("GOOGLE_API_KEY", "dummy"))
 
 
 settings = Settings()
