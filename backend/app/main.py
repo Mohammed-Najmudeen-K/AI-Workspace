@@ -74,10 +74,13 @@ app.include_router(auth_router)
 app.include_router(conversation_router)
 app.include_router(chat_stream.router)
 app.include_router(chat_router)
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173","https://ai-workspace-frontend.vercel.app"
+        "https://ai-workspace-frontend.vercel.app",
+        "http://localhost:5173",  # for local dev
     ],
     allow_credentials=True,
     allow_methods=["*"],
