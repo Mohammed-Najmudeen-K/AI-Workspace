@@ -1,4 +1,4 @@
-import api from "../api/api";
+import api, { API_URL } from "../api/api";
 
 export const createConversation = async (title: string) => {
     const response = await api.post("/conversations", {
@@ -63,7 +63,7 @@ export const streamMessage = async (
     currentController = controller;
 
     const response = await fetch(
-        "http://127.0.0.1:8014/chat/stream",
+        `${API_URL}/chat/stream`,
         {
             method: "POST",
             headers: {
